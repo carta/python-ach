@@ -83,28 +83,30 @@ class AchFile(object):
         entry_counter = 1
 
         for record in batch_entries:
+            try:
+                entry = EntryDetail(
+                    std_ent_cls_code=std_ent_cls_code,
+                    id_number=record.get('id_number', ''),
+                )
 
-            entry = EntryDetail(
-                std_ent_cls_code=std_ent_cls_code,
-                id_number=record.get('id_number', ''),
-            )
+                entry.transaction_code = record.get('type')
+                entry.recv_dfi_id = record.get('routing_number')
 
-            entry.transaction_code = record.get('type')
-            entry.recv_dfi_id = record.get('routing_number')
+                if len(record['routing_number']) < 9:
+                    entry.calc_check_digit()
+                else:
+                    entry.check_digit = record['routing_number'][8]
 
-            if len(record['routing_number']) < 9:
-                entry.calc_check_digit()
-            else:
-                entry.check_digit = record['routing_number'][8]
+                entry.dfi_acnt_num = record['account_number']
+                entry.amount = int(round(float(record['amount']) * 100))
+                entry.ind_name = record['name'].upper()[:22]
+                entry.trace_num = self.settings['immediate_dest'][:8] \
+                    + entry.validate_numeric_field(entry_counter, 7)
 
-            entry.dfi_acnt_num = record['account_number']
-            entry.amount = int(round(float(record['amount']) * 100))
-            entry.ind_name = record['name'].upper()[:22]
-            entry.trace_num = self.settings['immediate_dest'][:8] \
-                + entry.validate_numeric_field(entry_counter, 7)
-
-            entries.append((entry, record.get('addenda', [])))
-            entry_counter += 1
+                entries.append((entry, record.get('addenda', [])))
+                entry_counter += 1
+            except:
+                raise Exception('AHH')
 
         self.batches.append(FileBatch(batch_header, entries))
         self.set_control()

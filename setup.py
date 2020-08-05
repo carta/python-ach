@@ -3,8 +3,8 @@ from distutils.core import setup
 setup(
     name='carta-ach',
     author='Carta, Inc.',
-    author_email='jared.hobbs@carta.com',
-    version='0.4.5',
+    author_email='james.uejio@carta.com',
+    version='0.4.6',
     packages=[
         'ach',
     ],
