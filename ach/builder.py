@@ -42,7 +42,7 @@ class AchFile(object):
 
     def add_batch(self, std_ent_cls_code, batch_entries=None,
                   credits=True, debits=False, eff_ent_date=None,
-                  company_id=None, entry_desc=None, company_name=None):
+                  company_id=None, entry_desc=None, company_name=None, orig_dfi_id=None):
         """
         Use this to add batches to the file. For valid std_ent_cls_codes see:
         http://en.wikipedia.org/wiki/Automated_Clearing_House#SEC_codes
@@ -58,6 +58,9 @@ class AchFile(object):
 
         if not eff_ent_date:
             eff_ent_date = datetime.today() + timedelta(days=1)
+
+        if orig_dfi_id is None:
+            orig_dfi_id = self.settings['immediate_dest'][:8]
 
         if credits and debits:
             serv_cls_code = '200'
@@ -75,7 +78,7 @@ class AchFile(object):
             desc_date='',
             eff_ent_date=eff_ent_date.strftime('%y%m%d'),  # YYMMDD
             orig_stat_code='1',
-            orig_dfi_id=self.settings['immediate_dest'][:8],
+            orig_dfi_id=orig_dfi_id,
             company_name=(company_name or self.settings['company_name'])[:16],
         )
 
